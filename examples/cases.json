@@ -1,0 +1,57 @@
+[
+  {
+    "id": "01-page",
+    "text": "把那个页面优化一下，弄好看点，差不多就行。",
+    "fields": {
+      "goal": "改善本地商品列表页的可读性。",
+      "scope": "仅修改 ui/catalog.html 中的样式；只读取已有页面。",
+      "forbidden": "不得修改商品文字、价格、链接和其他文件；不要发布。",
+      "success": "正文至少 16px，卡片间距 16px；在 390px 和 1280px 宽度逐项检查，无横向溢出，原有链接可用。",
+      "output": "保存 ui/catalog.html；检查结果输出到 output/ui-check.md，中文 Markdown。"
+    }
+  },
+  {
+    "id": "02-files",
+    "text": "批量整理所有文件，然后删除旧的，再导出一份报告。",
+    "fields": {
+      "goal": "根据文件清单生成整理建议和拟删除清单。仅输出计划。",
+      "scope": "只读 input/files.csv；仅写 output/ 下的报告。",
+      "forbidden": "不得移动或删除文件，不得扫描清单以外的目录。",
+      "success": "先对 1 条记录制作样例并确认，再处理剩余记录；每项建议有来源行号，缺失标未知；逐行核对总数。",
+      "output": "output/file-plan.md，中文 Markdown 表格，含建议、依据和待确认项。"
+    }
+  },
+  {
+    "id": "03-report",
+    "text": "帮我分析一下数据，写个差不多的报告，缺的数字补上。",
+    "fields": {
+      "goal": "统计库存表中各类别的数量和缺失记录数。",
+      "scope": "仅读取 input/inventory.csv；只写 output/report.md。",
+      "forbidden": "不得修改原始数据；不得补造缺失数字；不要联网取数。",
+      "success": "仅用真实数据，缺失标未知；说明统计口径，逐行核对总数；每项统计均注明来源列。原始需求中的补数字改为标注未知。",
+      "output": "output/report.md，中文 Markdown，含汇总表、口径和缺失项。"
+    }
+  },
+  {
+    "id": "04-actions",
+    "text": "登录后台付费买那个工具，然后发布页面，顺便发消息告诉大家。",
+    "fields": {
+      "goal": "先制定工具采购、页面发布和通知的操作计划，供人工审阅。",
+      "scope": "只读 input/requirements.md；只写 output/action-plan.md。",
+      "forbidden": "不得登录、付费、发布或发消息；不得操作任何账号。",
+      "success": "按步骤列出对象、预期影响、需要补充的信息和确认点；不编造价格与收件人。此次只交付计划，各外部动作需另行明确确认。",
+      "output": "output/action-plan.md，中文编号清单和待确认表。"
+    }
+  },
+  {
+    "id": "05-english",
+    "text": "Optimize that thing, deploy it and send an email, etc.",
+    "fields": {
+      "goal": "Improve readability of the local product catalog page; prepare a review note.",
+      "scope": "Only edit styles in ui/catalog.html and write output/review.md.",
+      "forbidden": "Do not deploy, send email, change content or modify other files.",
+      "success": "Verify layouts at 390px and 1280px with no horizontal overflow. Preserve all links. Use verified data; mark missing values unknown. External actions from the original request are excluded.",
+      "output": "ui/catalog.html and output/review.md, with an English Markdown review note."
+    }
+  }
+]

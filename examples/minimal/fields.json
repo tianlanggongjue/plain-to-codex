@@ -1,0 +1,7 @@
+{
+  "goal": "把 sample-project/README.md 整理成「安装、使用、常见问题」三节。",
+  "scope": "只读 sample-project/README.md；只写 output/README.new.md。",
+  "forbidden": "不得修改原文件和其他目录；不要发布或提交。",
+  "success": "三节齐全；原文中的命令逐条保留；缺失信息标「未知」。",
+  "output": "output/README.new.md，中文 Markdown。"
+}

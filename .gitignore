@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+dist/
+build/
+*.egg-info/
+.coverage
+.pytest_cache/
+
+# 本地产物与日志（演示、QA 运行结果、录音视频等）
+out/
+*.log
+*.mp3
+*.mp4
+*.wav
+*.srt
+
+# 环境变量与密钥
+.env
+.env.*
+secrets/
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa*
+id_ed25519*
+cookies*.txt
+*credentials*.json
+
+# 编辑器 / 系统文件 / 本机私有配置
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+local/
+*.local.*

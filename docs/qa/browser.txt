@@ -1,0 +1,26 @@
+PASS 1280px: viewport width 1280
+PASS 1280px: file protocol
+PASS 1280px: empty input disables generation
+PASS 1280px: live lint
+PASS 1280px: danger action visible
+PASS 1280px: draft placeholders
+PASS 1280px: copy enabled
+PASS 1280px: copy receives complete brief
+PASS 1280px: clipboard fallback
+PASS 1280px: edited input invalidates old copy
+PASS 1280px: complete fields preserved
+PASS 1280px: user input is text
+PASS 1280px: no horizontal overflow
+PASS 500px: viewport width 500
+PASS 500px: file protocol
+PASS 500px: empty input disables generation
+PASS 500px: live lint
+PASS 500px: danger action visible
+PASS 500px: draft placeholders
+PASS 500px: copy enabled
+PASS 500px: copy receives complete brief
+PASS 500px: clipboard fallback
+PASS 500px: edited input invalidates old copy
+PASS 500px: complete fields preserved
+PASS 500px: user input is text
+PASS 500px: no horizontal overflow

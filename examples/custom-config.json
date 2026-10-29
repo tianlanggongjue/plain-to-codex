@@ -1,0 +1,14 @@
+{
+  "rules": [
+    {"id": "vague", "severity": "info"},
+    {
+      "id": "deadline",
+      "kind": "missing",
+      "pattern": "截止|交付日期|\\bdeadline\\b",
+      "severity": "warning",
+      "title": "缺少交付时间",
+      "why": "时间边界会影响任务安排和分批方式。",
+      "suggestion": "补充交付日期；没有时限时明确写出截止时间不限。"
+    }
+  ]
+}

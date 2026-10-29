@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'none'; base-uri 'none'; form-action 'none'">
+<title>codex-brief · 把需求说清楚</title>
+<style>
+:root { color-scheme: light; --ink:#202d32; --muted:#53656a; --line:#cdd9d8; --accent:#14675e; --paper:#f5f7f3; }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--paper); color:var(--ink); font:16px/1.7 system-ui,sans-serif; }
+header,main,footer { max-width:1200px; margin:auto; padding:24px; }
+header { padding-top:40px; }
+.brand { color:var(--accent); font-weight:750; letter-spacing:.04em; }
+h1 { font-size:clamp(28px,5vw,42px); line-height:1.25; margin:12px 0; }
+h2 { font-size:20px; margin:0 0 12px; }
+p { margin:8px 0; }
+.muted { color:var(--muted); }
+.layout { display:grid; grid-template-columns:1fr 1fr; gap:24px; align-items:start; }
+.panel { background:white; border:1px solid var(--line); border-radius:16px; padding:24px; }
+label { display:block; font-weight:650; margin:14px 0 6px; }
+textarea { display:block; width:100%; padding:12px; border:1px solid #91a8a4; border-radius:8px; background:white; color:var(--ink); font:inherit; resize:vertical; min-height:74px; }
+textarea:focus,button:focus-visible { outline:3px solid #68b6a5; outline-offset:3px; }
+#request { min-height:140px; }
+#brief { min-height:420px; font:14px/1.7 ui-monospace,monospace; white-space:pre-wrap; }
+.actions { display:flex; gap:12px; flex-wrap:wrap; margin:16px 0 6px; }
+button { font:inherit; font-weight:650; border-radius:8px; padding:10px 18px; cursor:pointer; color:white; background:var(--accent); border:1px solid var(--accent); }
+button.secondary { color:var(--accent); background:white; }
+button:disabled { opacity:.5; cursor:default; }
+#findings { list-style:none; padding:0; max-height:500px; overflow:auto; }
+#findings li { border-top:1px solid var(--line); padding:14px 0; }
+#findings p { font-size:14px; }
+.risk { color:#9a3412; font-weight:700; }
+.badge { display:inline-block; padding:2px 10px; border-radius:20px; background:#e1efeb; color:var(--accent); font-size:13px; }
+.output { margin-top:24px; }
+#status { min-height:28px; }
+footer { font-size:13px; color:var(--muted); }
+@media(max-width:760px) { .layout { grid-template-columns:1fr; } header,main,footer { padding:18px; } .panel { padding:18px; } }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">codex-brief <span class="badge">离线 · 免费 · 无需登录</span></div>
+  <h1>把想法说清楚，再交给 Codex。</h1>
+  <p class="muted">写下需求，补齐边界，生成一份可以检查的执行说明。内容仅在当前页面处理，刷新后清空。</p>
+</header>
+<main>
+  <div class="layout">
+    <section class="panel" aria-labelledby="input-heading">
+      <h2 id="input-heading">1. 写下你的需求</h2>
+      <label for="request">大白话</label>
+      <textarea id="request" placeholder="例如：把那个页面优化一下，再导出报告。" spellcheck="false"></textarea>
+      <p class="muted">下面五项可逐步补充。留空会标为“待补充”，不会替你猜。</p>
+      <label for="goal">目标</label><textarea id="goal" placeholder="最终希望得到什么结果？"></textarea>
+      <label for="scope">范围白名单</label><textarea id="scope" placeholder="哪些资料可以读？哪些文件可以改？"></textarea>
+      <label for="forbidden">禁区</label><textarea id="forbidden" placeholder="哪些文件不能改？哪些动作不能做？"></textarea>
+      <label for="success">成功标准</label><textarea id="success" placeholder="有哪些可以逐项检查的验收条件？"></textarea>
+      <label for="output">输出位置与格式</label><textarea id="output" placeholder="例如：output/report.md，中文 Markdown 表格。"></textarea>
+      <div class="actions"><button id="generate" type="button" disabled>生成 brief</button></div>
+    </section>
+    <section class="panel" aria-labelledby="issues-heading">
+      <h2 id="issues-heading">2. 看看还缺什么</h2>
+      <p id="count" role="status" aria-live="polite">输入后，这里会实时显示建议。</p>
+      <p class="muted">规则提示帮助你补齐信息；没有提示也不代表需求完整。</p>
+      <ul id="findings"></ul>
+    </section>
+  </div>
+  <section class="panel output" aria-labelledby="output-heading">
+    <h2 id="output-heading">3. 检查并复制</h2>
+    <label for="brief">Markdown brief</label>
+    <textarea id="brief" readonly placeholder="生成后在这里查看。"></textarea>
+    <div class="actions"><button id="copy" type="button" disabled>复制 brief</button><button id="download" class="secondary" type="button" disabled>下载 .md</button></div>
+    <p id="status" role="status" aria-live="polite"></p>
+    <p class="muted">这里只整理文字。请检查后再交给本机 Codex；网页不会执行任务。</p>
+  </section>
+</main>
+<footer>codex-brief · MIT License · 默认规则同时用于命令行和此单文件页面。</footer>
+<script id="brief-config" type="application/json">__CONFIG__</script>
+<script>__ENGINE__</script>
+<script>
+'use strict';
+const config = JSON.parse(document.getElementById('brief-config').textContent);
+const byId = id => document.getElementById(id);
+const fields = () => Object.fromEntries(config.fields.map(f => [f.key, byId(f.key).value]));
+function setReady(ready) { byId('copy').disabled = !ready; byId('download').disabled = !ready; }
+function refresh() {
+  const text = byId('request').value;
+  byId('generate').disabled = !text.trim();
+  if (byId('brief').value) {
+    setReady(false);
+    byId('status').textContent = '输入已更改，请重新生成 brief。';
+  }
+  byId('findings').replaceChildren();
+  if (!text.trim()) { byId('count').textContent = '输入后，这里会实时显示建议。'; return; }
+  const findings = CodexBrief.lint(text, fields(), config);
+  byId('count').textContent = findings.length ? '发现 ' + findings.length + ' 项可改进之处' : '未发现规则命中的问题。请继续人工检查。';
+  for (const item of findings) {
+    const li = document.createElement('li');
+    const title = document.createElement('strong');
+    title.textContent = (item.severity === 'error' ? '高风险 · ' : '') + item.title;
+    if (item.severity === 'error') title.className = 'risk';
+    li.append(title);
+    const lines = [item.evidence.length ? '命中：' + item.evidence.join(' / ') : '', '为什么会让 Codex 误解：' + item.why, '建议怎么补：' + item.suggestion];
+    for (const line of lines.filter(Boolean)) { const p = document.createElement('p'); p.textContent = line; li.append(p); }
+    byId('findings').append(li);
+  }
+}
+for (const id of ['request', ...config.fields.map(f => f.key)]) byId(id).addEventListener('input', refresh);
+byId('generate').addEventListener('click', () => {
+  byId('brief').value = CodexBrief.build(byId('request').value, fields(), config);
+  setReady(true);
+  byId('status').textContent = '已生成。检查待补充项和执行边界后再使用。';
+});
+byId('copy').addEventListener('click', async () => {
+  const content = byId('brief').value;
+  try {
+    if (!navigator.clipboard || !navigator.clipboard.writeText) throw new Error('fallback');
+    await navigator.clipboard.writeText(content);
+    byId('status').textContent = '已复制 brief。';
+  } catch (_) {
+    byId('brief').focus(); byId('brief').select();
+    let ok = false;
+    try { ok = document.execCommand('copy'); } catch (_) { /* Keep text selected for manual copy. */ }
+    byId('status').textContent = ok ? '已复制 brief。' : '浏览器未允许自动复制，已选中文本；请按 Ctrl+C 或 Command+C，也可下载 .md。';
+  }
+});
+byId('download').addEventListener('click', () => {
+  const url = URL.createObjectURL(new Blob([byId('brief').value], {type:'text/markdown;charset=utf-8'}));
+  const a = document.createElement('a'); a.href = url; a.download = 'brief.md'; a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  byId('status').textContent = '已请求下载 brief.md。';
+});
+</script>
+</body>
+</html>

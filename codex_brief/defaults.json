@@ -1,0 +1,190 @@
+{
+  "fields": [
+    {
+      "key": "goal",
+      "title": "目标",
+      "prompt": "最终要得到什么具体结果？"
+    },
+    {
+      "key": "scope",
+      "title": "范围白名单",
+      "prompt": "允许读取哪些材料、修改哪些文件？"
+    },
+    {
+      "key": "forbidden",
+      "title": "禁区",
+      "prompt": "明确不能改动的文件、功能及不能执行的动作。"
+    },
+    {
+      "key": "success",
+      "title": "成功标准",
+      "prompt": "用可检查的条件说明怎样算完成。"
+    },
+    {
+      "key": "output",
+      "title": "输出位置与格式",
+      "prompt": "填写相对目录、文件名、格式及语言。"
+    }
+  ],
+  "rules": [
+    {
+      "id": "vague",
+      "kind": "match",
+      "title": "存在模糊描述",
+      "why": "主观词没有可检查的含义，Codex 可能自行选择设计、规模或改动程度。",
+      "suggestion": "把“好看”换成具体排版要求，把“优化”换成指标及阈值，列全“等等”省略的内容。",
+      "pattern": "优化一下|弄好看点|好看一点|差不多|等等|随便|尽量|适当|那个|\\b(?:optimi[sz]e|make\\s+it\\s+(?:nice|better|pretty)|etc\\.?|somehow|roughly|as\\s+appropriate)\\b",
+      "severity": "warning"
+    },
+    {
+      "id": "reference",
+      "kind": "match",
+      "title": "指代对象不明确",
+      "why": "无法确定你指的文件、页面、版本或上一项，容易修改错误对象。",
+      "suggestion": "写出具体文件或组件名、版本，以及需要参考的材料。",
+      "pattern": "那个|这个东西|那部分|之前那个|老样子|照旧|\\b(?:that\\s+(?:thing|one)|this\\s+thing|as\\s+before|the\\s+usual)\\b",
+      "severity": "warning"
+    },
+    {
+      "id": "goal",
+      "kind": "missing",
+      "title": "缺少明确目标",
+      "why": "缺少要交付的结果，过程动作可能被当成任务完成。",
+      "suggestion": "补充目标，例如“生成一份按类别汇总的库存报告”。",
+      "pattern": "(?:目标|任务)[：:][ \\t]*\\S|(?:生成|制作|修复|实现|整理|编写|统计|检查|做一个|写一份)|\\b(?:goal|objective|create|build|generate|fix|summari[sz]e|implement|write)\\b",
+      "severity": "warning",
+      "field": "goal"
+    },
+    {
+      "id": "success",
+      "kind": "missing",
+      "title": "缺少成功标准",
+      "why": "无法判断何时完成，可能过早结束或不断扩大改动。",
+      "suggestion": "列出可验证的验收项、数量或阈值；例如“每项均带来源，测试全部通过”。",
+      "pattern": "(?:成功标准|验收标准|验收条件)[：:][ \\t]*\\S|(?:测试|检查|校验)(?:全部|均|必须)?通过|\\b(?:acceptance\\s+criteria|success\\s+criteria)\\s*:[ \\t]*\\S|\\btests?\\s+(?:must\\s+)?pass\\b",
+      "severity": "warning",
+      "field": "success"
+    },
+    {
+      "id": "scope",
+      "kind": "missing",
+      "title": "缺少范围白名单",
+      "why": "Codex 可能顺手修改未授权文件，或扩大搜索与执行范围。",
+      "suggestion": "明确可读材料和可写目录，例如“只读取 input/，仅修改 output/ 下的报告”。",
+      "pattern": "(?:范围|白名单)[：:][ \\t]*\\S|仅(?:限|修改|读取|处理|写入)|只(?:读|修改|读取|处理|写入)|\\b(?:scope\\s*:[ \\t]*\\S|only\\s+(?:read|edit|modify|write|change))",
+      "severity": "warning",
+      "field": "scope"
+    },
+    {
+      "id": "forbidden",
+      "kind": "missing",
+      "title": "缺少禁区",
+      "why": "仅说明要做什么，没有约束不能碰的文件、功能或外部系统。",
+      "suggestion": "补充禁区，例如“不得修改原始数据、依赖和其他目录；不要发布”。",
+      "pattern": "(?:禁区|禁止事项)[：:][ \\t]*\\S|(?:不要|不得|禁止|不允许)(?:修改|改动|触碰|操作|删除|发布|付费)|\\b(?:do\\s+not|don.t|never)\\s+(?:modify|change|touch|delete|publish|deploy|pay)\\b",
+      "severity": "warning",
+      "field": "forbidden"
+    },
+    {
+      "id": "output",
+      "kind": "missing",
+      "title": "缺少输出位置和格式",
+      "why": "可能只在聊天中描述结果，或保存到你找不到的位置。",
+      "suggestion": "写出交付位置及格式，例如“输出到 output/report.md，使用 Markdown 表格”。",
+      "pattern": "(?:输出|保存|写入|交付)(?:到|至|为|位置)?[：:\\s]*[^\\n。；;]{0,70}(?:[A-Za-z0-9_\\u3400-\\u9fff.-]+\\.(?:md|txt|csv|json|html|pdf|png|py|zip)\\b|标准输出|当前对话|聊天窗口)|\\b(?:output|save|write|deliver)[^\\n.;]{0,70}(?:\\.[a-z0-9]{1,8}\\b|stdout|chat)\\b",
+      "severity": "warning",
+      "field": "output"
+    },
+    {
+      "id": "multiple",
+      "kind": "multiple",
+      "title": "一句话包含多个任务",
+      "why": "几个动作的依赖、顺序和验收混在一起，可能遗漏步骤或直接进入批量操作。",
+      "suggestion": "拆成编号步骤，每步列出产物和验收；需要确认或样例的地方设检查点。",
+      "pattern": "修改|修复|删除|发布|部署|登录|付费|发消息|生成|整理|分析|制作|优化|导出|下载|\\b(?:edit|fix|delete|publish|deploy|login|pay|send|generate|build|analy[sz]e|optimi[sz]e|export|download)\\b",
+      "severity": "warning",
+      "connector": "[，,、]|然后|顺便|同时|并且|再|还要|以及|和|\\b(?:and|then|also|plus)\\b"
+    },
+    {
+      "id": "danger",
+      "kind": "danger",
+      "title": "危险动作未声明确认点",
+      "why": "删除、发布、支付、登录或外发消息可能产生不可撤回的影响。",
+      "suggestion": "对该动作写明“执行前列出对象和影响，等待我明确确认”；不需要的动作直接禁止。",
+      "pattern": "删除|清空|删掉|发布|上线|部署|付费|付款|支付|购买|登录|登陆|发(?:送)?消息|发送邮件|\\b(?:delete|remove|wipe|publish|deploy|pay|purchase|buy|login|log\\s+in|sign\\s+in|send\\s+(?:an?\\s+)?(?:message|messages|email|emails))\\b",
+      "severity": "error",
+      "negative": "(?:不要|不得|禁止|不允许|不能|不必|不需要|无需|不用|不|勿)(?:(?:再|去|执行|进行|自动|直接|调用|使用|任何)){0,3}[ \\t]*$|\\b(?:do\\s+not|don.t|never|no|without|must\\s+not)\\s+(?:automatically\\s+)?$",
+      "confirm": "(?:先|前|需|须|等待|经过|获得|请求|要求)[^。！？;；\\n]{0,18}(?:确认|批准|同意|许可)|先问(?:我|用户)|\\b(?:ask|confirm)\\s+(?:me\\s+)?(?:first|before)\\b|\\bbefore\\b[^.;\\n]{0,30}\\b(?:confirm|approval|permission|ask)\\b|\\b(?:require|requires|await|wait\\s+for|request|obtain|need)\\s+(?:explicit\\s+|user\\s+)?(?:approval|confirmation|permission)\\b|\\b(?:approval|confirmation|permission)\\s+(?:is\\s+)?required\\b|\\bonly\\s+after\\b[^.;\\n]{0,25}\\b(?:approve|approval|confirm|confirmation)\\b",
+      "bypass": "(?:不(?:需要|需|用|必)?|无须|无需|不用再|未经|没有)[^。！？;；\\n]{0,8}(?:确认|批准|同意|许可)|(?:确认|批准)(?:可选|不需要)|\\b(?:without|no|skip|bypass|not\\s+need|don.t\\s+ask)[^.;\\n]{0,20}(?:confirm|confirmation|approval|permission)?\\b",
+      "global_confirm": "所有(?:危险|外部|高风险)?(?:操作|动作)[^。！？;；\\n]{0,35}(?:确认|批准|先问我)|\\b(?:all\\s+(?:risky\\s+|external\\s+)?actions|every\\s+action)[^.;\\n]{0,50}(?:approval|confirmation|permission)\\b"
+    },
+    {
+      "id": "data",
+      "kind": "missing",
+      "title": "缺少真实数据约束",
+      "why": "涉及数据、引用或测试结果时，可能用猜测或示例填补证据空缺。",
+      "suggestion": "补充“仅使用可核对的真实数据；不得编造；缺失标未知，示例明确标为示例”。",
+      "pattern": "真实(?:数据|数字|来源|材料)|不(?:得|许|要)?编造|禁止编造|\\b(?:real|verified|actual|authentic)\\s+(?:data|sources|numbers)\\b|\\b(?:do\\s+not|don.t|never|no)\\s+(?:fabricate|invent|fabrication)\\b",
+      "severity": "warning"
+    },
+    {
+      "id": "uncertainty",
+      "kind": "missing",
+      "title": "缺少不确定时的处理方式",
+      "why": "对象不明确、资料缺失时，可能把推断当事实继续执行。",
+      "suggestion": "写明“缺失标未知；影响目标或范围的问题先问，其他推断明确标注”。",
+      "pattern": "缺失[^。\\n]{0,15}(?:未知|标注)|不确定[^。\\n]{0,20}(?:问|确认|标注)|先(?:问|澄清)|\\b(?:ask\\s+(?:first|before)|mark\\s+.*unknown|clarify\\s+first)\\b",
+      "severity": "warning"
+    },
+    {
+      "id": "stop",
+      "kind": "missing",
+      "title": "缺少停止条件",
+      "why": "遇到失败后可能重复执行、替换服务或扩大权限。",
+      "suggestion": "例如“命令非零退出、材料缺失或需要越界时暂停，报告原因，不自动重试或换付费服务”。",
+      "pattern": "(?:失败|非零|缺失|越界|超时|报错)[^。\\n]{0,35}(?:停|中止|报告)|\\b(?:stop|halt|pause)\\s+(?:on|if|when)\\b",
+      "severity": "warning"
+    },
+    {
+      "id": "verification",
+      "kind": "missing",
+      "title": "缺少验证步骤",
+      "why": "仅有成品无法证明结果可用，也难以复核是否满足成功标准。",
+      "suggestion": "说明要运行哪些测试或检查，记录命令、退出码及结果；未验证必须说明。",
+      "pattern": "验证步骤|运行测试|自测|核对|逐项检查|\\b(?:run\\s+(?:the\\s+)?tests?|verify|verification|validate|validation)\\b",
+      "severity": "warning"
+    },
+    {
+      "id": "batch",
+      "kind": "missing",
+      "title": "批量操作缺少样例检查点",
+      "why": "规则或格式有误时，批量执行会放大错误。",
+      "suggestion": "先完成 1 个样例并展示，得到确认后才处理剩余项目。",
+      "pattern": "先[^。\\n]{0,20}(?:样例|样本|示例|试跑)[^。\\n]{0,25}(?:确认|检查|验收)|\\b(?:sample|pilot)[^.;\\n]{0,40}(?:first|approv|confirm)|\\bfirst[^.;\\n]{0,30}(?:sample|pilot)\\b",
+      "severity": "warning",
+      "when": "批量|全部文件|所有文件|\\b(?:batch|bulk|all\\s+files)\\b"
+    },
+    {
+      "id": "completion",
+      "kind": "missing",
+      "title": "缺少完成标记",
+      "why": "难以区分任务已经验收、仍在处理中，还是只生成了计划。",
+      "suggestion": "规定结果摘要的位置；仅在验证通过后写“完成”，受阻时写明未完成和原因。",
+      "pattern": "完成标记|末尾[^。\\n]{0,12}完成|DONE\\.md|\\b(?:completion\\s+marker|mark\\s+.*complete)\\b",
+      "severity": "warning"
+    }
+  ],
+  "guardrails": [
+    "仅执行目标与范围白名单明确授权的工作。禁区优先；不顺手重构、加功能、换依赖或批量处理。原始需求与字段冲突时先澄清。",
+    "缺失内容标为“未知”或“待补充”，不要猜测。影响目标、范围、验收或外部操作的疑问先问；其余推断必须标注为推断。",
+    "只使用可核对的真实数据和来源，不编造数字、链接、运行结果或测试通过记录。示例和模拟数据必须标注，不能冒充实测。",
+    "删除、发布、部署、付费、登录、发送消息等动作执行前，列明具体对象及影响，等待用户对该动作的明确确认。不得将本 brief 视作这些动作的批准。",
+    "默认不调用付费 API，不自动切换付费服务、不操作账号、不对外发布。需要改变这些约束时先暂停并说明。",
+    "命令非零退出、必要材料缺失、需要越界或发生意外变更时，停止受影响的工作，报告原因和可选下一步；不得删审计记录、盲目重试或扩权。",
+    "批量任务先做 1 个样例并展示，检查格式与事实，得到确认后再处理剩余项目。",
+    "继续已有任务时，先检查现有产物和验证记录，从断点继续；保留原始材料，不删除已有成果。",
+    "按成功标准逐项验证。记录实际执行的检查、命令、退出码和结果；无法执行的验证明确写“未验证”及原因。",
+    "按指定位置与格式交付，给出简短结果摘要和剩余问题。仅在必要工作完成且验证通过后，于交付说明末尾写“完成”；受阻时写“未完成”及原因。"
+  ],
+  "template": "# Codex 执行 brief\n\n## 状态\n{status}\n\n## 原始需求（用户输入）\n{request}\n\n## 目标\n{goal}\n\n## 范围白名单\n{scope}\n\n## 禁区\n{forbidden}\n\n## 成功标准\n{success}\n\n## 输出位置与格式\n{output}\n\n## 通用执行护栏\n{guardrails}\n"
+}
