@@ -8,6 +8,8 @@
 
 **English:** A dependency-free, offline brief builder for nontechnical Codex CLI users. Lint Chinese or English requests, explain ambiguity in Chinese, and generate structured Markdown with editable guardrails. Sending to a local Codex CLI is optional and requires `--run`. No model name is hardcoded. MIT licensed.
 
+**新手请先看：[使用教程（零基础版）](docs/使用教程.md)**
+
 ## 快速使用
 
 进入项目目录，无需安装依赖。Linux 示例：
